@@ -426,9 +426,11 @@ const onCreateNode = async ({
 
   const htmlNode = {
     rawHtml: rawHtml,
+    justText: $.text(),
     frontmatter: {
       id: node.name,
-      title: normalize($("h1").eq(0).text())
+      title: normalize($("title").eq(0).text()),
+      slug: `${node.relativeDirectory !== '' ? '/' + node.relativeDirectory : ''}/${node.name}`,
     },
 
     id: createNodeId(`${node.id} >>> HTML`),
@@ -489,7 +491,7 @@ const setFieldsOnGraphQLNodeType = (
           $ = highlightCode($);
           $ = addIdsForIndexableFragments($);
 
-          let html = fixClosingTagsInHighlightedCode($.html("article"));
+          let html = fixClosingTagsInHighlightedCode($.html("body"));
           html = replaceVariables(html, createMapReplacer(variables));
           return html;
         }
