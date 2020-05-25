@@ -1,3 +1,19 @@
+*Added*: url slug, full text, html not constrained to <article>, other changes
+
+*Added*: section info to the frontmatter based on *very* specific file naming convention.
+
+```
+DocumnetName.01.02.html
+             ^------------- sectionNumber
+                 ^--------- articleNumber
+             ^____^
+                |---------- documentNumber
+```
+
+*Added*: Removing of *very* specific `no script` leftovers
+
+*Added*: `excerpt` of 100 chars (should be an option, really)
+
 Based on: 
 A Gatsby transformer plugin for authoring content in HTML, part of
 [`gatsby-starter-apidocs`](https://github.com/carrotsearch/gatsby-starter-apidocs).
@@ -22,8 +38,6 @@ Another functional area of the plugin is extracting paragraph-sized text snippet
 
 The enriched HTML and lists of extracted text snippets are available in Gatsby's GraphQL model for use by other plugins.
 
-
-*Added*: url slug, full text, html not constrained to <article>, other changes
 
 License: MIT
 

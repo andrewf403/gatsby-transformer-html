@@ -14,11 +14,34 @@ const { removeCommonIndent } = require("./src/remove-common-indent.js");
 const { rewriteInternalLinks } = require("./src/rewrite-internal-links.js");
 const extractFragment = require("./src/extract-fragment.js");
 
+const documnetNumberRegex = /\.((\d+)\.(\d+))$/;
+
 // The transformation functions should be converted to plugins, but
 // for now we keep them integrated to avoid proliferation of boilerplate.
 
 const notInPre = $ => (i, el) => $(el).parents("pre").length === 0;
 const indexingAllowed = $ => (i, el) => $(el).data("indexing") !== "disabled";
+
+const getDocumentNumbers = (fileName) => {
+  /*
+      documentNumber: '',
+      sectionNumber: '',
+      articleNumber: ''
+   */
+  const result = {
+    documentNumber: '99999.99999',
+    sectionNumber: '99999',
+    articleNumber: '99999'
+  };
+  const docNumbers = documnetNumberRegex.exec(fileName);
+  if (docNumbers !== null && docNumbers.length === 4) {
+    result.articleNumber = docNumbers[3].toString().length > 1 ? docNumbers[3].toString() : `0${docNumbers[3].toString()}`;
+    result.sectionNumber = docNumbers[2].toString().length > 1 ? docNumbers[2].toString() : `0${docNumbers[2].toString()}`;
+    result.documentNumber = `${result.sectionNumber}.${result.articleNumber}`;
+  }
+
+  return result;
+};
 
 /**
  * Calls the "gatsby-remark-prismjs" plugin's highlighting code and returns
@@ -354,7 +377,11 @@ const headingExtractors = [
 ];
 
 const normalize = t => {
-  return t.trim().replace(/(\s|\n)+/g, " ");
+  return t
+    .trim()
+    .replace(/(\s|\n)+/g, " ")
+    .replace("<div id=\"noscript_padding\"></div>", "")
+    .replace("<div id=\"noscript_warning\">This site works best with JavaScript enabled</div>", "");
 };
 
 const collectIndexableFragments = $ => {
@@ -424,11 +451,17 @@ const onCreateNode = async ({
   const rawHtml = await loadNodeContent(node);
   let $ = cheerio.load(rawHtml, { decodeEntities: false });
 
+  const documnetNumbers = getDocumentNumbers(node.name);
+
   const htmlNode = {
     rawHtml: rawHtml,
-    justText: $.text(),
+    excerpt: `${normalize($.text()).substr(0,100)}&hellip;`,
+    justText: normalize($.text()),
     frontmatter: {
       id: node.name,
+      documentNumber: documnetNumbers.documentNumber,
+      sectionNumber: documnetNumbers.sectionNumber,
+      articleNumber: documnetNumbers.articleNumber,
       title: normalize($("title").eq(0).text()),
       slug: `${node.relativeDirectory !== '' ? '/' + node.relativeDirectory : ''}/${node.name}`,
     },
