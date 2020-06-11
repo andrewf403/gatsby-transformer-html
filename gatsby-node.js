@@ -157,6 +157,18 @@ const highlightCode = $ => {
   return $;
 };
 
+
+const reduceImageFileName = (filename) => {
+  // const nameArray = filename.split('/');
+  // if (nameArray.length > 1) {
+  //   return nameArray.slice(Math.max(nameArray.length - 2, 0)).join('/');
+  // } else {
+  //   return filename;
+  // }
+
+  return filename;
+}
+
 /**
  * Process images through "gatsby-plugin-sharp". This will copy and optimize
  * the image in multiple resolutions for different devices.
@@ -167,11 +179,11 @@ const processImages = async ($, fileNodesByPath, pathPrefix, reporter, cache) =>
   // Collect images whose relative paths point at existing files.
   const imageNodesToProcess = [];
   $img.each((i, img) => {
-    const src = img.attribs.src;
+    const src = reduceImageFileName(img.attribs.src);
     if (_.has(fileNodesByPath, src)) {
       imageNodesToProcess.push(fileNodesByPath[src]);
     } else {
-      reporter.warn(`Image file not found for img src ${src}.`);
+      reporter.warn(`!!_>>>>>>Image file not found for img src ${src}.`);
     }
   });
 
@@ -185,15 +197,15 @@ const processImages = async ($, fileNodesByPath, pathPrefix, reporter, cache) =>
       }))
   );
   const processedByRelativePath = processed.reduce((map, fluid, i) => {
-    map[imageNodesToProcess[i].relativePath] = fluid;
+    map[reduceImageFileName(imageNodesToProcess[i].relativePath)] = fluid;
     return map;
   }, {});
 
   // Replace the images in the HTML.
   $img
-      .filter((i, img) => _.has(processedByRelativePath, img.attribs.src))
+      .filter((i, img) => _.has(processedByRelativePath, reduceImageFileName(img.attribs.src)))
       .replaceWith((i, img) => {
-        const fluid = processedByRelativePath[img.attribs.src];
+        const fluid = processedByRelativePath[reduceImageFileName(img.attribs.src)];
         const className = [img.attribs.class, "fluid"].filter(e => !!e).join(" ");
         const ratio = `${(1 / fluid.aspectRatio) * 100}%`;
         return `<div style="position: relative">
@@ -510,7 +522,7 @@ const setFieldsOnGraphQLNodeType = (
       html: {
         type: "String",
         resolve: async (node) => {
-          const fileNodesByPath = _.keyBy(getNodesByType("File"), n => n.relativePath);
+          const fileNodesByPath = _.keyBy(getNodesByType("File"), n => reduceImageFileName(n.relativePath));
 
           // For correct highlighting of HTML code, we need to disable
           // entity resolution in cheerio and then patch this in the
