@@ -159,14 +159,12 @@ const highlightCode = $ => {
 
 
 const reduceImageFileName = (filename) => {
-  // const nameArray = filename.split('/');
-  // if (nameArray.length > 1) {
-  //   return nameArray.slice(Math.max(nameArray.length - 2, 0)).join('/');
-  // } else {
-  //   return filename;
-  // }
-
-  return filename;
+  const nameArray = filename.split('/');
+  if (nameArray.length > 1) {
+    return nameArray.slice(Math.max(nameArray.length - 2, 0)).join('/');
+  } else {
+    return filename;
+  }
 }
 
 /**
